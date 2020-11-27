@@ -7,10 +7,8 @@ d3.json(queryUrl, function(data) {
 });
 
 function createMap(earthquakeData) {
-    // Loop through locations and markers elements
-      EarthquakeMarkers = earthquakeData.map((feature) =>
-                    //Yes, the geojson 'FORMAT' stores it in reverse, for some reason. (L.geojson parses it as [lat,lng] for you)
-                     //lat                         //long  
+    // Create markers
+      earthquakeMarkers = earthquakeData.map((feature) =>
         L.circleMarker([feature.geometry.coordinates[1],feature.geometry.coordinates[0]],{
             radius: magCheck(feature.properties.mag),
             stroke: true,
@@ -26,15 +24,13 @@ function createMap(earthquakeData) {
         "</h3><hr><p>" + new Date(feature.properties.time) + "</p>")
       )
 
-      // Add the earthquakes layer to a marker cluster group.
-      var earthquakes=L.layerGroup(EarthquakeMarkers)
-    //    console.log(d3.extent(d3.values(earthquakeData,((d) => +d.properties.mag))));
+      // Create earthquake layers
+      var earthquakes = L.layerGroup(earthquakeMarkers)
        var mags = earthquakeData.map((d) => magCheck(+d.properties.mag));
        console.log(d3.extent(mags));
        console.log(mags);
-    //    console.log(earthquakeData.properties.mag);
 
-  // Define streetmap and darkmap layers
+  // Create streetmap
   var streetmap = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
     attribution: "© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>",
     tileSize: 512,
@@ -44,7 +40,7 @@ function createMap(earthquakeData) {
     accessToken: API_KEY
   });
 
-  // Create our map, giving it the streetmap and earthquakes layers to display on load
+  // Create myMap
   var myMap = L.map("map", {
     center: [
       38.98, -96.02
@@ -53,7 +49,7 @@ function createMap(earthquakeData) {
     layers: [streetmap, earthquakes]
   });
 
-// Add a legend to the map
+// Create legend
 var legend = L.control({ position: "bottomright" });
 
 legend.onAdd = function(myMap){
@@ -68,6 +64,7 @@ legend.onAdd = function(myMap){
     return div;
 }
 
+// Add legend to mymap
 legend.addTo(myMap);
 }
 
@@ -82,8 +79,8 @@ legend.addTo(myMap);
     return color;
     
     };
-// Function to determine if the magnitude is zero or less (See above discussion as it is possible to have
-// negative magnitudes, which obviously can't be used for setting the circleMarker radius)
+
+// Function to check for magnitude below 1
 function magCheck(mag){
   if (mag <= 1){
       return 8
