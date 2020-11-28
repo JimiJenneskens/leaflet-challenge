@@ -33,5 +33,5 @@ Table of contents <a name="toc"></a>
 ##### Screenshot Leaflet-Step-1
 ![Step-1 screenshot](screenshot_step_1.png)
 
-##### Screenshot Leaflet-Step-1
+##### Screenshot Leaflet-Step-2
 ![Step-2 screenshot](screenshot_step_2.png)
