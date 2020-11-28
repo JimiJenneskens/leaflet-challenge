@@ -42,9 +42,7 @@ function createMap(earthquakeData) {
 
   // Create myMap
   var myMap = L.map("map", {
-    center: [
-      38.98, -96.02
-    ],
+    center: [38.98, -96.02],
     zoom: 4,
     layers: [streetmap, earthquakes]
   });

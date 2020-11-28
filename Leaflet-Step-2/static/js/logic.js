@@ -1,14 +1,21 @@
 // Query all earthquakes in last 7 days
 var queryUrl = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson";
+// Query plates 
+var plateUrl = "https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json";
 
-// Perform request and get data
+// Perform requests and get data
 d3.json(queryUrl, function(data) {
-  createMap(data.features);
-});
+  let earthquakeData = data.features
+  d3.json(plateUrl, function(data) {
+    let plateData = data.features
 
-function createMap(earthquakeData) {
+    createMap(earthquakeData,plateData)
+  })
+})
+
+function createMap(earthquakeData, plateData) {
     // Create markers
-      earthquakeMarkers = earthquakeData.map((feature) =>
+    let earthquakeMarkers = earthquakeData.map((feature) =>
         L.circleMarker([feature.geometry.coordinates[1],feature.geometry.coordinates[0]],{
             radius: magCheck(feature.properties.mag),
             stroke: true,
@@ -25,11 +32,20 @@ function createMap(earthquakeData) {
       )
 
       // Create earthquake layers
-      var earthquakes = L.layerGroup(earthquakeMarkers)
-       var mags = earthquakeData.map((d) => magCheck(+d.properties.mag));
-       console.log(d3.extent(mags));
-       console.log(mags);
+      var earthquakes = L.layerGroup(earthquakeMarkers);
 
+      function makePolyline(feature, layer){
+        L.polyline(feature.geometry.coordinates);
+      }
+      
+      let plates = L.geoJSON(plateData, {
+        onEachFeature: makePolyline,
+          style: {
+            color: 'orange',
+            opacity: 1
+          }
+      })
+  
   // Create streetmap
   var streetmap = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
     attribution: "© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>",
@@ -40,11 +56,53 @@ function createMap(earthquakeData) {
     accessToken: API_KEY
   });
 
+  // Create darkmap
+  var darkmap = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
+    attribution: "© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>",
+    tileSize: 512,
+    maxZoom: 18,
+    zoomOffset: -1,
+    id: "mapbox/dark-v10",
+    accessToken: API_KEY
+  });
+
+  // Create outdoors map
+  var outdoors = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
+    attribution: "© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>",
+    tileSize: 512,
+    maxZoom: 18,
+    zoomOffset: -1,
+    id: "mapbox/outdoors-v11",
+    accessToken: API_KEY
+  });
+
+  // Create satellite map
+  var satellite = L.tileLayer("https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}", {
+    attribution: "© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>",
+    tileSize: 512,
+    maxZoom: 18,
+    zoomOffset: -1,
+    id: "mapbox/satellite-v9",
+    accessToken: API_KEY
+  });
+
+  // Create basemaps
+  var baseMaps = {
+    "Street Map": streetmap,
+    "Dark Map": darkmap,
+    "Outdoors Map": outdoors,
+    "Satellite Map": satellite
+  };
+
+  // Create overlay objects
+  var overlayMaps = {
+    Earthquakes: earthquakes,
+    Plates : plates
+  };
+
   // Create myMap
   var myMap = L.map("map", {
-    center: [
-      38.98, -96.02
-    ],
+    center: [38.98, -96.02],
     zoom: 4,
     layers: [streetmap, earthquakes]
   });
@@ -66,6 +124,9 @@ legend.onAdd = function(myMap){
 
 // Add legend to mymap
 legend.addTo(myMap);
+L.control.layers(baseMaps, overlayMaps, {
+  collapsed: false
+}).addTo(myMap);
 }
 
      function magColor(mag) {
