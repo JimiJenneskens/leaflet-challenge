@@ -96,8 +96,8 @@ function createMap(earthquakeData, plateData) {
 
   // Create overlay objects
   var overlayMaps = {
-    Earthquakes: earthquakes,
-    Plates : plates
+    "Fault Lines": plates,
+    "Earthquakes": earthquakes
   };
 
   // Create myMap
