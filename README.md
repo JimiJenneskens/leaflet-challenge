@@ -27,7 +27,8 @@ Table of contents <a name="toc"></a>
 ##### Files
 
 * index.html -- Leaflet-Step-1 webpage (marked with tracked earthquakes of last 7 days overlay, Fault Line overlay and different base maps to choose from).
-* assets/js/app.js -- JavaScript for index.html webpage functionality.
+* static/css/style.css -- style sheet for webpage.
+* static/js/logic.js -- JavaScript for index.html webpage functionality.
 
 ##### Screenshot Leaflet-Step-1
 ![Step-1 screenshot](screenshot_step_1.png)
